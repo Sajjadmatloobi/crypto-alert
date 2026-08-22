@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Crypto 100%+ Growth Alert Bot (KCEX Futures coins only - via CoinGecko)
-=========================================================================
+Crypto 100%+ Growth Alert Bot (MEXC Futures coins only - via CoinGecko + MEXC)
+=================================================================================
 هر بار اجرا میشه:
-  1) لیست همه‌ی نمادهایی که تو صرافی KCEX Futures معامله میشن رو از CoinGecko می‌گیره
-     (چون خود KCEX هیچ API عمومی برای دیتای بازار نداره، از دیتای CoinGecko
-     که خودش از KCEX دیتا جمع‌آوری می‌کنه استفاده می‌کنیم)
+  1) لیست همه‌ی نمادهایی که تو MEXC Futures معامله میشن رو مستقیم از خود API
+     رسمی و عمومی MEXC می‌گیره (بدون نیاز به توکن)
   2) لیست ~2000 ارز برتر رو از CoinGecko با درصد رشد 24 ساعته می‌گیره
-  3) فقط ارزهایی که هم شرط رشد >= PCT_THRESHOLD رو دارن هم تو لیست KCEX Futures
-     هستن رو آلارم می‌ده
+  3) فقط ارزهایی که هم شرط رشد >= PCT_THRESHOLD رو دارن هم تو لیست MEXC Futures
+     هستن رو آلارم می‌ده (یعنی فیلتر پامپ‌های کوین‌های ناشناس و کم‌نقد انجام میشه)
+
+MEXC از لحاظ تعداد و تنوع ارزها خیلی شبیه KCEX هست (هر دو هزاران آلت‌کوین
+کوچیک رو پوشش می‌دن)، ولی برخلاف KCEX یک API عمومی رسمی و مستند داره.
 
 توکن‌ها از Environment Variables خونده میشن:
   TELEGRAM_BOT_TOKEN
@@ -37,41 +39,32 @@ COINGECKO_MARKETS_URL = (
     "&price_change_percentage=24h&sparkline=false"
 )
 
-KCEX_EXCHANGE_ID = "kcex-futures"
-KCEX_TICKERS_URL = (
-    "https://api.coingecko.com/api/v3/exchanges/{exchange_id}/tickers?page={page}"
-)
+MEXC_FUTURES_URL = "https://contract.mexc.com/api/v1/contract/detail"
 
 
 def fetch_json(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(req, timeout=20) as resp:
+    with urllib.request.urlopen(url, timeout=20) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
-def fetch_kcex_futures_symbols():
+def fetch_mexc_futures_symbols():
     symbols = set()
-    page = 1
-    max_pages = 15
-    while page <= max_pages:
-        url = KCEX_TICKERS_URL.format(exchange_id=KCEX_EXCHANGE_ID, page=page)
-        try:
-            data = fetch_json(url)
-        except Exception as e:
-            print(f"[!] خطا در گرفتن صفحه {page} از KCEX tickers: {e}")
-            break
+    try:
+        data = fetch_json(MEXC_FUTURES_URL)
+    except Exception as e:
+        print(f"[!] خطا در گرفتن لیست MEXC Futures: {e}")
+        return symbols
 
-        tickers = data.get("tickers", [])
-        if not tickers:
-            break
+    contracts = data.get("data", [])
+    if not isinstance(contracts, list):
+        print("[!] فرمت پاسخ MEXC غیرمنتظره بود.")
+        return symbols
 
-        for t in tickers:
-            base = t.get("base")
-            if base:
-                symbols.add(base.upper())
-
-        page += 1
-        time.sleep(2)
+    for c in contracts:
+        base = c.get("baseCoin")
+        if base:
+            symbols.add(base.upper())
 
     return symbols
 
@@ -128,15 +121,17 @@ def main():
 
     state = load_state()
 
-    kcex_symbols = fetch_kcex_futures_symbols()
-    print(f"[*] تعداد ارزهای دارای فیوچرز در KCEX: {len(kcex_symbols)}")
-    if not kcex_symbols:
-        print("[!] لیست فیوچرز KCEX خالیه، از اجرای این دور صرف‌نظر میشه.")
+    mexc_symbols = fetch_mexc_futures_symbols()
+    print(f"[*] تعداد ارزهای دارای فیوچرز در MEXC: {len(mexc_symbols)}")
+    if not mexc_symbols:
+        print("[!] لیست فیوچرز MEXC خالیه، از اجرای این دور صرف‌نظر میشه.")
+        save_state(state)
         return
 
     coins = fetch_all_coins()
     if not coins:
         print("[!] هیچ داده‌ای از CoinGecko دریافت نشد.")
+        save_state(state)
         return
 
     now = time.time()
@@ -155,13 +150,13 @@ def main():
         if change is None or price is None or coin_id is None:
             continue
 
-        if symbol not in kcex_symbols:
+        if symbol not in mexc_symbols:
             continue
 
         if change >= PCT_THRESHOLD and not state["alerted"].get(coin_id):
             msg = (
                 f"🚀 <b>{name} ({symbol})</b>\n"
-                f"✅ دارای فیوچرز در KCEX\n"
+                f"✅ دارای فیوچرز در MEXC\n"
                 f"رشد ۲۴ ساعته: {change:.1f}٪\n"
                 f"قیمت الان: ${price}"
             )
