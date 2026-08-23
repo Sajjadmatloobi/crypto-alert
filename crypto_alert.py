@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 """
-Crypto 100%+ Growth Alert Bot (MEXC Futures coins only - via CoinGecko + MEXC)
-=================================================================================
+Crypto 100%+ Growth Alert Bot (Direct MEXC Futures data - real-time)
+=======================================================================
 هر بار اجرا میشه:
-  1) لیست همه‌ی نمادهایی که تو MEXC Futures معامله میشن رو مستقیم از خود API
-     رسمی و عمومی MEXC می‌گیره (بدون نیاز به توکن)
-  2) لیست ~2000 ارز برتر رو از CoinGecko با درصد رشد 24 ساعته می‌گیره
-  3) فقط ارزهایی که هم شرط رشد >= PCT_THRESHOLD رو دارن هم تو لیست MEXC Futures
-     هستن رو آلارم می‌ده (یعنی فیلتر پامپ‌های کوین‌های ناشناس و کم‌نقد انجام میشه)
+  1) مستقیم از API خود MEXC (بدون واسطه) قیمت لحظه‌ای و درصد رشد ۲۴ ساعته‌ی
+     همه‌ی نمادهای فیوچرز رو می‌گیره (endpoint: /api/v1/contract/ticker)
+  2) هر نمادی که رشدش >= PCT_THRESHOLD بود رو آلارم می‌ده
 
-MEXC از لحاظ تعداد و تنوع ارزها خیلی شبیه KCEX هست (هر دو هزاران آلت‌کوین
-کوچیک رو پوشش می‌دن)، ولی برخلاف KCEX یک API عمومی رسمی و مستند داره.
+چون دیتا مستقیم از خود MEXC میاد (نه CoinGecko)، مشکل تداخل نماد با
+کوین‌های بی‌ربط و مشکل تاخیر داده حل میشه.
 
 توکن‌ها از Environment Variables خونده میشن:
   TELEGRAM_BOT_TOKEN
@@ -27,62 +25,31 @@ TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 PCT_THRESHOLD = 100.0
-PAGES_TO_FETCH = 8
-PER_PAGE = 250
-SLEEP_BETWEEN_PAGES = 2
 
 STATE_FILE = "crypto_alert_state.json"
 
-COINGECKO_MARKETS_URL = (
-    "https://api.coingecko.com/api/v3/coins/markets"
-    "?vs_currency=usd&order=market_cap_desc&per_page={per_page}&page={page}"
-    "&price_change_percentage=24h&sparkline=false"
-)
-
-MEXC_FUTURES_URL = "https://contract.mexc.com/api/v1/contract/detail"
+MEXC_TICKER_URL = "https://contract.mexc.com/api/v1/contract/ticker"
 
 
 def fetch_json(url):
     req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    with urllib.request.urlopen(url, timeout=20) as resp:
+    with urllib.request.urlopen(req, timeout=20) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
-def fetch_mexc_futures_symbols():
-    symbols = set()
+def fetch_mexc_tickers():
     try:
-        data = fetch_json(MEXC_FUTURES_URL)
+        data = fetch_json(MEXC_TICKER_URL)
     except Exception as e:
-        print(f"[!] خطا در گرفتن لیست MEXC Futures: {e}")
-        return symbols
+        print(f"[!] خطا در گرفتن دیتای MEXC: {e}")
+        return []
 
-    contracts = data.get("data", [])
-    if not isinstance(contracts, list):
+    tickers = data.get("data", [])
+    if not isinstance(tickers, list):
         print("[!] فرمت پاسخ MEXC غیرمنتظره بود.")
-        return symbols
+        return []
 
-    for c in contracts:
-        base = c.get("baseCoin")
-        if base:
-            symbols.add(base.upper())
-
-    return symbols
-
-
-def fetch_all_coins():
-    coins = []
-    for page in range(1, PAGES_TO_FETCH + 1):
-        url = COINGECKO_MARKETS_URL.format(per_page=PER_PAGE, page=page)
-        try:
-            data = fetch_json(url)
-        except Exception as e:
-            print(f"[!] خطا در گرفتن صفحه {page}: {e}")
-            break
-        if not data:
-            break
-        coins.extend(data)
-        time.sleep(SLEEP_BETWEEN_PAGES)
-    return coins
+    return tickers
 
 
 def load_state():
@@ -121,16 +88,10 @@ def main():
 
     state = load_state()
 
-    mexc_symbols = fetch_mexc_futures_symbols()
-    print(f"[*] تعداد ارزهای دارای فیوچرز در MEXC: {len(mexc_symbols)}")
-    if not mexc_symbols:
-        print("[!] لیست فیوچرز MEXC خالیه، از اجرای این دور صرف‌نظر میشه.")
-        save_state(state)
-        return
-
-    coins = fetch_all_coins()
-    if not coins:
-        print("[!] هیچ داده‌ای از CoinGecko دریافت نشد.")
+    tickers = fetch_mexc_tickers()
+    print(f"[*] تعداد نمادهای دریافت‌شده از MEXC: {len(tickers)}")
+    if not tickers:
+        print("[!] هیچ داده‌ای دریافت نشد.")
         save_state(state)
         return
 
@@ -140,33 +101,30 @@ def main():
         state["reset_time"] = now
 
     alerts_sent = 0
-    for coin in coins:
-        symbol = (coin.get("symbol") or "").upper()
-        name = coin.get("name")
-        price = coin.get("current_price")
-        change = coin.get("price_change_percentage_24h")
-        coin_id = coin.get("id")
+    for t in tickers:
+        symbol = t.get("symbol")
+        last_price = t.get("lastPrice")
+        rise_fall_rate = t.get("riseFallRate")
 
-        if change is None or price is None or coin_id is None:
+        if symbol is None or last_price is None or rise_fall_rate is None:
             continue
 
-        if symbol not in mexc_symbols:
-            continue
+        change_pct = rise_fall_rate * 100
 
-        if change >= PCT_THRESHOLD and not state["alerted"].get(coin_id):
+        if change_pct >= PCT_THRESHOLD and not state["alerted"].get(symbol):
             msg = (
-                f"🚀 <b>{name} ({symbol})</b>\n"
-                f"✅ دارای فیوچرز در MEXC\n"
-                f"رشد ۲۴ ساعته: {change:.1f}٪\n"
-                f"قیمت الان: ${price}"
+                f"🚀 <b>{symbol}</b>\n"
+                f"✅ فیوچرز MEXC\n"
+                f"رشد ۲۴ ساعته: {change_pct:.1f}٪\n"
+                f"قیمت الان: ${last_price}"
             )
             print(msg)
             send_telegram_message(msg)
-            state["alerted"][coin_id] = True
+            state["alerted"][symbol] = True
             alerts_sent += 1
 
     save_state(state)
-    print(f"Done. Coins checked: {len(coins)}, alerts sent: {alerts_sent}")
+    print(f"Done. Symbols checked: {len(tickers)}, alerts sent: {alerts_sent}")
 
 
 if __name__ == "__main__":
