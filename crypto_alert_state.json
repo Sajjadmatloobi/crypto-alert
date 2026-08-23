@@ -1,4 +1,7 @@
 {
-  "alerted": {},
+  "alerted": {
+    "the-index": true,
+    "blastar": true
+  },
   "reset_time": 1787511867.9865448
 }
