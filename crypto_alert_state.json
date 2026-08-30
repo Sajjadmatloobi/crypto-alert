@@ -1,4 +1,8 @@
 {
-  "alerted": {},
+  "alerted": {
+    "HNT_USDT": true,
+    "NIULAI_USDT": true,
+    "UPROBINHOOD_USDT": true
+  },
   "reset_time": 1788069192.44702
 }
