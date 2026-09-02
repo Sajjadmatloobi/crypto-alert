@@ -1,4 +1,7 @@
 {
-  "alerted": {},
+  "alerted": {
+    "MOO_USDT": true,
+    "MICRODUCK_USDT": true
+  },
   "reset_time": 1788258666.590958
 }
