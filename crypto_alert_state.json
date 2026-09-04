@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "FATCOIN_USDT": true
+  },
   "reset_time": 1788458626.3403773
 }
