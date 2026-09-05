@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "BULLA_USDT": true
+  },
   "reset_time": 1788551477.7836974
 }
