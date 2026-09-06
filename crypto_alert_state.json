@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "MEMEROBINHOOD_USDT": true
+  },
   "reset_time": 1788640960.6129763
 }
