@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "SOPH_USDT": true
+  },
   "reset_time": 1788822178.4661152
 }
