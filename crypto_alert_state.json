@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "ZZZ_USDT": true
+  },
   "reset_time": 1788910319.9110425
 }
