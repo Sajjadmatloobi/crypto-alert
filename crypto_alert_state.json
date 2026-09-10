@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "BUN_USDT": true
+  },
   "reset_time": 1789002831.0736945
 }
