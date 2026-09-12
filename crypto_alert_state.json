@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "LONGXIA_USDT": true
+  },
   "reset_time": 1789105974.333343
 }
