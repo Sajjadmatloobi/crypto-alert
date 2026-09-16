@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "ORBIO_USDT": true
+  },
   "reset_time": 1789485280.044931
 }
