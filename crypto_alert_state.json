@@ -1,6 +1,8 @@
 {
   "alerted": {
-    "ORBIO_USDT": true
+    "ORBIO_USDT": true,
+    "BR_USDT": true,
+    "SYN_USDT": true
   },
   "reset_time": 1789485280.044931
 }
