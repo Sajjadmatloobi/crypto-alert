@@ -1,7 +1,9 @@
 {
   "alerted": {
     "MUSEBOOK_USDT": true,
-    "SUE_USDT": true
+    "SUE_USDT": true,
+    "MCAT_USDT": true,
+    "ROBIN_USDT": true
   },
   "reset_time": 1789583013.0589032
 }
