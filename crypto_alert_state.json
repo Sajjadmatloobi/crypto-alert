@@ -1,6 +1,7 @@
 {
   "alerted": {
-    "HOOKR_USDT": true
+    "HOOKR_USDT": true,
+    "G_USDT": true
   },
   "reset_time": 1789676351.0387106
 }
