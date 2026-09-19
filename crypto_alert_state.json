@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "AKE_USDT": true
+  },
   "reset_time": 1789771221.5783973
 }
