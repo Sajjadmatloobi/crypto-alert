@@ -1,4 +1,7 @@
 {
-  "alerted": {},
+  "alerted": {
+    "GSTOCK_USDT": true,
+    "COOL_USDT": true
+  },
   "reset_time": 1789859704.7461243
 }
