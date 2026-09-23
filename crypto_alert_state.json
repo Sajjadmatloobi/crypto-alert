@@ -1,4 +1,7 @@
 {
-  "alerted": {},
+  "alerted": {
+    "TAKE_USDT": true,
+    "KIMISTOCK_USDT": true
+  },
   "reset_time": 1790146029.3371606
 }
