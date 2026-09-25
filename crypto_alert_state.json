@@ -1,4 +1,6 @@
 {
-  "alerted": {},
-  "reset_time": 1790251310.6486814
+  "alerted": {
+    "BREW_USDT": true
+  },
+  "reset_time": 1790338546.1427207
 }
