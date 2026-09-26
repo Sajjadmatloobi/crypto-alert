@@ -1,6 +1,7 @@
 {
   "alerted": {
-    "BREW_USDT": true
+    "BREW_USDT": true,
+    "PAID_USDT": true
   },
   "reset_time": 1790338546.1427207
 }
