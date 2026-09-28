@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "EACC_USDT": true
+  },
   "reset_time": 1790536034.973334
 }
