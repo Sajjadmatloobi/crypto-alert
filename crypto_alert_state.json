@@ -1,4 +1,7 @@
 {
-  "alerted": {},
+  "alerted": {
+    "US_USDT": true,
+    "GMBSC_USDT": true
+  },
   "reset_time": 1791475543.0499606
 }
