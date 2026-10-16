@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "ZC_USDT": true
+  },
   "reset_time": 1792138619.5361586
 }
