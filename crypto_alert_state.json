@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "JCT_USDT": true
+  },
   "reset_time": 1792419906.8576021
 }
