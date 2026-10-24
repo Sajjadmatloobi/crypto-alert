@@ -1,8 +1,6 @@
 {
   "alerted": {
-    "IRYS_USDT": true,
-    "HOOKED_USDT": true,
-    "ORDER_USDT": true
+    "HOOKED_USDT": true
   },
-  "reset_time": 1792783201.054556
+  "reset_time": 1792869836.9817064
 }
