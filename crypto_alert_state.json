@@ -1,7 +1,4 @@
 {
-  "alerted": {
-    "Q_USDT": true,
-    "AIN_USDT": true
-  },
-  "reset_time": 1793061452.540531
+  "alerted": {},
+  "reset_time": 1793166053.352562
 }
