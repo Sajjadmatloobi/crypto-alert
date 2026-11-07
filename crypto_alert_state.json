@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "CLAUDIA_USDT": true
+  },
   "reset_time": 1794035164.8128762
 }
