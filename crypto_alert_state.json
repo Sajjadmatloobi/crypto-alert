@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "AGT_USDT": true
+  },
   "reset_time": 1794308365.8510513
 }
