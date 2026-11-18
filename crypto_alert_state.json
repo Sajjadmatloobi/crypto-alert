@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "MMT_USDT": true
+  },
   "reset_time": 1794925002.3161674
 }
