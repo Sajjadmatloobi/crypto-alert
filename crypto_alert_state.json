@@ -1,4 +1,6 @@
 {
-  "alerted": {},
+  "alerted": {
+    "BITO_USDT": true
+  },
   "reset_time": 1795034754.8506377
 }
